@@ -7,6 +7,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.Box;
@@ -18,20 +22,22 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class Server extends JFrame implements ActionListener {
+public class Server implements ActionListener {
 
+  static DataOutputStream dout;
+  static Box vertical = Box.createVerticalBox();
+  static JFrame f = new JFrame();
   JTextField text;
   JPanel a1;
-  Box vertical = Box.createVerticalBox();
 
   Server() {
-    setTitle("Server");
-    setLayout(null);
+    f.setTitle("Server");
+    f.setLayout(null);
 
     JPanel p1 = new JPanel();
     p1.setBackground(new Color(7, 94, 84));
     p1.setBounds(0, 0, 450, 70);
-    add(p1);
+    f.add(p1);
     p1.setLayout(null);
 
     // Adding back button
@@ -102,13 +108,13 @@ public class Server extends JFrame implements ActionListener {
     // Adding message area
     a1 = new JPanel();
     a1.setBounds(5, 75, 440, 570);
-    add(a1);
+    f.add(a1);
 
     // Adding text field
     text = new JTextField();
     text.setBounds(5, 655, 310, 40);
     text.setFont(new java.awt.Font("SAN_SERIF", java.awt.Font.PLAIN, 16));
-    add(text);
+    f.add(text);
 
     // Adding send button
     JButton send = new JButton("Send");
@@ -117,20 +123,20 @@ public class Server extends JFrame implements ActionListener {
     send.setForeground(Color.WHITE);
     send.addActionListener(this);
     send.setFont(new java.awt.Font("SAN_SERIF", java.awt.Font.PLAIN, 16));
-    add(send);
+    f.add(send);
 
-    setSize(450, 700);
-    setUndecorated(true);
-    setVisible(true);
-    setLocation(200, 50);
-    getContentPane().setBackground(Color.WHITE);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    f.setSize(450, 700);
+    f.setUndecorated(true);
+    f.setVisible(true);
+    f.setLocation(200, 50);
+    f.getContentPane().setBackground(Color.WHITE);
+    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
   }
 
-  public static void main(String[] args) {
-    new Server();
-  }
-
+  // function to format the label
+  // this function will take the string and return the panel
+  // which contains the string and the time
+  // in a formatted way
   public static JPanel formatLabel(String out) {
     JPanel panel = new JPanel();
     panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -148,24 +154,61 @@ public class Server extends JFrame implements ActionListener {
     time.setText(sdf.format(cal.getTime()));
     panel.add(time);
     return panel;
+  }
 
+  public static void main(String[] args) {
+    new Server();
+
+    try {
+      ServerSocket skt = new ServerSocket(6001);
+
+      // this outer while loop is used to keep the server running and accepting multiple clients
+      // but if we have only one client then we can remove this outer while loop
+      while (true) {
+        Socket s = skt.accept();
+        DataInputStream din = new DataInputStream(s.getInputStream());
+        dout = new DataOutputStream(s.getOutputStream());
+
+        while (true) {
+          String msg = din.readUTF();
+          JPanel panel = formatLabel(msg);
+
+          // this is used to align the panel to the left
+          JPanel left = new JPanel(new BorderLayout());
+          // this will add the panel to the left side of the screen
+          left.add(panel, BorderLayout.LINE_START);
+          vertical.add(left);
+
+          // this will add a vertical space between two messages
+          f.validate();
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
   public void actionPerformed(ActionEvent ae) {
-    String out = text.getText();
-    JPanel p2 = formatLabel(out);
+    try {
+      String out = text.getText();
+      JPanel p2 = formatLabel(out);
 
-    a1.setLayout(new BorderLayout());
-    JPanel right = new JPanel(new BorderLayout());
-    right.add(p2, BorderLayout.LINE_END);
-    vertical.add(right);
-    vertical.add(Box.createVerticalStrut(15));
-    a1.add(vertical, BorderLayout.PAGE_START);
-    text.setText("");
-    repaint();
-    invalidate();
-    validate();
+      a1.setLayout(new BorderLayout());
+      JPanel right = new JPanel(new BorderLayout());
+      right.add(p2, BorderLayout.LINE_END);
+      vertical.add(right);
+      vertical.add(Box.createVerticalStrut(15));
+      a1.add(vertical, BorderLayout.PAGE_START);
+
+      dout.writeUTF(out);
+      text.setText("");
+
+      f.repaint();
+      f.invalidate();
+      f.validate();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
-
 }

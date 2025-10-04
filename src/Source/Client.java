@@ -7,6 +7,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.Box;
@@ -18,20 +21,29 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class Client extends JFrame implements ActionListener {
 
+public class Client implements ActionListener {
+
+  static JPanel a1;
+  static DataOutputStream dout;
+  static Box vertical = Box.createVerticalBox();
+  static JFrame f = new JFrame();
   JTextField text;
-  JPanel a1;
-  Box vertical = Box.createVerticalBox();
 
   Client() {
-    setTitle("Client");
-    setLayout(null);
+    // Frame title
+    f.setTitle("Client");
+
+    // Setting layout to null
+    f.setLayout(null);
 
     JPanel p1 = new JPanel();
     p1.setBackground(new Color(7, 94, 84));
+
+    // Setting bounds for the panel because layout is null and this will set the position and size of the panel
+    // So basically this panel will be at the top of the frame and will cover the entire width of the frame
     p1.setBounds(0, 0, 450, 70);
-    add(p1);
+    f.add(p1);
     p1.setLayout(null);
 
     // Adding back button
@@ -102,13 +114,13 @@ public class Client extends JFrame implements ActionListener {
     // Adding message area
     a1 = new JPanel();
     a1.setBounds(5, 75, 440, 570);
-    add(a1);
+    f.add(a1);
 
     // Adding text field
     text = new JTextField();
     text.setBounds(5, 655, 310, 40);
     text.setFont(new java.awt.Font("SAN_SERIF", java.awt.Font.PLAIN, 16));
-    add(text);
+    f.add(text);
 
     // Adding send button
     JButton send = new JButton("Send");
@@ -117,20 +129,30 @@ public class Client extends JFrame implements ActionListener {
     send.setForeground(Color.WHITE);
     send.addActionListener(this);
     send.setFont(new java.awt.Font("SAN_SERIF", java.awt.Font.PLAIN, 16));
-    add(send);
+    f.add(send);
 
-    setSize(450, 700);
-    setUndecorated(true);
-    setVisible(true);
-    setLocation(200, 50);
-    getContentPane().setBackground(Color.WHITE);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    // Frame properties
+    f.setSize(450, 700);
+
+    // this will remove the title bar
+    f.setUndecorated(true);
+
+    // this will make the frame visible
+    f.setVisible(true);
+
+    // this will set the location of the frame on the screen
+    f.setLocation(900, 50);
+
+    // this will set the background color of the frame
+    f.getContentPane().setBackground(Color.WHITE);
+
+    // this will close the application when the frame is closed
+    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
   }
 
-  public static void main(String[] args) {
-    new Client();
-  }
-
+  // This method is used to format the label
+  // This method will take a string as input and will return a JPanel
+  // This JPanel will contain the formatted label
   public static JPanel formatLabel(String out) {
     JPanel panel = new JPanel();
     panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -138,6 +160,8 @@ public class Client extends JFrame implements ActionListener {
     JLabel output = new JLabel("<html><p style=\"width: 150px\">" + out + "</p></html>");
     output.setFont(new java.awt.Font("Tahoma", java.awt.Font.PLAIN, 16));
     output.setBackground(new Color(37, 211, 102));
+
+    // we did this because by default the label is not opaque and this opaque property will make the background color visible
     output.setOpaque(true);
     output.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 50));
     panel.add(output);
@@ -150,20 +174,60 @@ public class Client extends JFrame implements ActionListener {
     return panel;
   }
 
+  public static void main(String[] args) {
+    new Client();
+    try {
+      // Just to keep the client running
+      Socket s = new Socket("127.0.0.1", 6001);
+      DataInputStream din = new DataInputStream(s.getInputStream());
+      dout = new DataOutputStream(s.getOutputStream());
+
+      while (true) {
+        a1.setLayout(new BorderLayout());
+        String msg = din.readUTF();
+        JPanel panel = formatLabel(msg);
+
+        JPanel left = new JPanel(new BorderLayout());
+        left.add(panel, BorderLayout.LINE_START);
+        vertical.add(left);
+
+        vertical.add(Box.createVerticalStrut(15));
+        a1.add(vertical, BorderLayout.PAGE_START);
+        f.repaint();
+        f.invalidate();
+        f.validate();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  // This method will be called when the send button is clicked
+  // This method is responsible for sending the message to the server
+  // and also for displaying the message in the message area
+  // This method is overridden from the ActionListener interface
+  // This method is called when the send button is clicked
+  // The ActionEvent parameter is used to get the source of the event
   @Override
   public void actionPerformed(ActionEvent ae) {
-    String out = text.getText();
-    JPanel p2 = formatLabel(out);
+    try {
+      String out = text.getText();
+      JPanel p2 = formatLabel(out);
 
-    a1.setLayout(new BorderLayout());
-    JPanel right = new JPanel(new BorderLayout());
-    right.add(p2, BorderLayout.LINE_START);
-    vertical.add(right);
-    vertical.add(Box.createVerticalStrut(15));
-    a1.add(vertical, BorderLayout.PAGE_START);
-    text.setText("");
-    repaint();
-    invalidate();
-    validate();
+      a1.setLayout(new BorderLayout());
+      JPanel right = new JPanel(new BorderLayout());
+      right.add(p2, BorderLayout.LINE_START);
+      vertical.add(right);
+      vertical.add(Box.createVerticalStrut(15));
+      a1.add(vertical, BorderLayout.PAGE_START);
+
+      dout.writeUTF(out);
+      text.setText("");
+      f.repaint();
+      f.invalidate();
+      f.validate();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }
