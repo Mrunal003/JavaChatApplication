@@ -24,6 +24,9 @@ A simple Java Swing-based chat application featuring client and server for real-
 - Java 8 or higher
 - IntelliJ IDEA or any Java IDE
 
+## Simple UI of the Application
+![img.png](img.png)
+
 ### Running the Application
 
 1. Clone the repository:

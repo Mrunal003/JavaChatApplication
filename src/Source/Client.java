@@ -98,7 +98,7 @@ public class Client implements ActionListener {
     p1.add(dots);
 
     // Adding Name
-    JLabel name = new JLabel("MoneyHeist");
+    JLabel name = new JLabel("B");
     name.setBounds(110, 15, 100, 18);
     name.setFont(new java.awt.Font("SAN_SERIF", java.awt.Font.BOLD, 16));
     name.setForeground(Color.WHITE);
@@ -155,6 +155,7 @@ public class Client implements ActionListener {
   // This JPanel will contain the formatted label
   public static JPanel formatLabel(String out) {
     JPanel panel = new JPanel();
+
     panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
     JLabel output = new JLabel("<html><p style=\"width: 150px\">" + out + "</p></html>");
@@ -216,7 +217,9 @@ public class Client implements ActionListener {
 
       a1.setLayout(new BorderLayout());
       JPanel right = new JPanel(new BorderLayout());
-      right.add(p2, BorderLayout.LINE_START);
+
+      // this will add the panel to the right side of the screen
+      right.add(p2, BorderLayout.LINE_END);
       vertical.add(right);
       vertical.add(Box.createVerticalStrut(15));
       a1.add(vertical, BorderLayout.PAGE_START);
