@@ -18,14 +18,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class Server extends JFrame implements ActionListener {
+public class Client extends JFrame implements ActionListener {
 
   JTextField text;
   JPanel a1;
   Box vertical = Box.createVerticalBox();
 
-  Server() {
-    setTitle("Server");
+  Client() {
+    setTitle("Client");
     setLayout(null);
 
     JPanel p1 = new JPanel();
@@ -86,7 +86,7 @@ public class Server extends JFrame implements ActionListener {
     p1.add(dots);
 
     // Adding Name
-    JLabel name = new JLabel("Mirzapur");
+    JLabel name = new JLabel("MoneyHeist");
     name.setBounds(110, 15, 100, 18);
     name.setFont(new java.awt.Font("SAN_SERIF", java.awt.Font.BOLD, 16));
     name.setForeground(Color.WHITE);
@@ -128,7 +128,7 @@ public class Server extends JFrame implements ActionListener {
   }
 
   public static void main(String[] args) {
-    new Server();
+    new Client();
   }
 
   public static JPanel formatLabel(String out) {
@@ -148,7 +148,6 @@ public class Server extends JFrame implements ActionListener {
     time.setText(sdf.format(cal.getTime()));
     panel.add(time);
     return panel;
-
   }
 
   @Override
@@ -158,7 +157,7 @@ public class Server extends JFrame implements ActionListener {
 
     a1.setLayout(new BorderLayout());
     JPanel right = new JPanel(new BorderLayout());
-    right.add(p2, BorderLayout.LINE_END);
+    right.add(p2, BorderLayout.LINE_START);
     vertical.add(right);
     vertical.add(Box.createVerticalStrut(15));
     a1.add(vertical, BorderLayout.PAGE_START);
@@ -167,5 +166,4 @@ public class Server extends JFrame implements ActionListener {
     invalidate();
     validate();
   }
-
 }
