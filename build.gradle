@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'com.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.guava:guava:31.1-jre'
+    testImplementation 'junit:junit:4.13.2'
+}
+
+application {
+    mainClass = 'Source.Client'
+}
+
+tasks.register('runClient', JavaExec) {
+    mainClass = 'Source.Client'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+tasks.register('runServer', JavaExec) {
+    mainClass = 'Source.Server'
+    classpath = sourceSets.main.runtimeClasspath
+}
